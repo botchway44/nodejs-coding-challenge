@@ -1,0 +1,29 @@
+{
+  "name": "Noode.JS-Coding-Challenge",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node app.js",
+    "test": "mocha --recursive"
+  },
+  "dependencies": {
+    "body-parser": "^1.16.1",
+    "express": "~4.11.1",
+    "express-bearer-token": "^2.1.0",
+    "hash": "^0.2.0",
+    "mongodb": "^2.2.24",
+    "uuid": "^3.0.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-ng-annotate": "^1.1.0",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-uglify": "^1.2.0",
+    "gulp-watch": "^4.3.4",
+    "mocha": "^2.4.5",
+    "supertest": "^1.2.0",
+    "supertest-as-promised": "^3.1.0"
+  }
+}
