@@ -3,7 +3,6 @@
 let assert = require('chai').assert;
 let request = require('supertest-as-promised');
 const MockMongoClientConnection  = require('./mock-mongo.js');
-
 const  makeApp  = require('../../app.js');
 
 const app = makeApp(new MockMongoClientConnection());
