@@ -14,6 +14,7 @@ mongoClient.connect(process.env.MONGODB_URL).then(() => {
         console.log("Listening on port ", PORT)
     });
 }).catch(err => {
+    console.log(err);
     throw err;
 });
 

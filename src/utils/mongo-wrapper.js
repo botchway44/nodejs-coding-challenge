@@ -12,9 +12,9 @@ module.exports =  class MongoClientConnection{
     }
     
      connect(mongo_url){
-        console.log("Connecting to Databse ... ", mongo_url);
+        console.log("Connecting to Databse ... ");
         return new Promise((resolve, reject) => {
-            MongoClient.connect(mongo_url, { useUnifiedTopology: true }, async (
+            MongoClient.connect(mongo_url, async (
                 err,
                 client
             ) => {
