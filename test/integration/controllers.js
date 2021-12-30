@@ -2,8 +2,12 @@
 
 let assert = require('chai').assert;
 let request = require('supertest-as-promised');
+const MockMongoClientConnection  = require('./mock-mongo.js');
 
-let app = require('../../app');
+const  makeApp  = require('../../app.js');
+
+const app = makeApp(new MockMongoClientConnection());
+
 let _user = 'integration_test_' + Math.floor(Date.now() / 1000) + '@alttab.co';
 
 describe('Authentication Controller', () => {
