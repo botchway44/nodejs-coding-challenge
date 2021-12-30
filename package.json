@@ -3,18 +3,20 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node app.js",
+    "start": "node server.js",
     "test": "mocha --recursive"
   },
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "body-parser": "^1.19.1",
+    "dotenv": "^10.0.0",
+    "email-validator": "^2.0.4",
     "express": "~4.11.1",
     "express-bearer-token": "^2.1.0",
     "hash": "^0.2.0",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^2.2.24",
-    "uuid": "^3.0.1",
-    "dotenv": "^10.0.0"
+    "uuid": "^3.0.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",

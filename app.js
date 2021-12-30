@@ -1,43 +1,27 @@
 'use strict';
 
 const express = require('express');
-const app = express();
 const path = require("path");
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
-const MongoClientConnection  = require('./utils/mongo-wrapper.js');
+var validator = require("email-validator");
+
+const PasswordUtils  = require('./src/utils/password.js');
+const JWTUtils  = require('./src/utils/jwt.js');
 require("dotenv").config();
 
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static(path.join(__dirname, "./public")));
 
-const authenticateJWT = (req, res, next) => {
-    const authHeader = req.headers.authorization;
+module.exports =  function (mongoClient) {
+    const app = express();
 
-    if (authHeader) {
-        const token = authHeader.split(' ')[1];
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: false }));
+    app.use(express.static(path.join(__dirname, "./public")));
+    const accessTokenSecret = process.env.JWT_SECRET;
+    
 
-        jwt.verify(token, accessTokenSecret, (err, user) => {
-            if (err) {
-                return res.sendStatus(403);
-            }
-
-            req.user = user;
-            next();
-        });
-    } else {
-        res.sendStatus(401);
-    }
-};
-
-
-/**
- * email
- * password
- * name => res => 201
- */
+/**Register a new User */
 app.post('/api/register', async (req, res) => {
     const { email, password, name } = req.body;
     if (!email || !password || !name) {
@@ -47,43 +31,73 @@ app.post('/api/register', async (req, res) => {
         return;
     }
 
-    // Filter user from the users array by username and password
-    // const user = users.find(u => { return u.username === username && u.password === password });
 
-    if (true) {
+    //verify if user already exists
+    const user = await mongoClient.findEmail(email);
+
+    // Create User and append to the users table
+
+    // User created successfully, generate token
+    if(!user){
+        const saltPassword = await PasswordUtils.saltPassword(password);
+        const new_user = await mongoClient.addUser(email, saltPassword, name);
+
+        if(new_user){
         // Generate an access token
         const accessToken = jwt.sign({ name: name,  email: email }, accessTokenSecret);
 
         res.status(201).send({
             token: accessToken
         });
+        }else{
+            res.status(400).send('Failed creating user');
+        }
     } 
-    // else {
-    //     res.send('Username or password incorrect');
-    // }
+    else {
+        res.status(400).send('Email already exists');
+    }
 
-    res.status(201).send({
-        token: 'token'
-    });
 });
 
 
-/**
- * email
- * passowrd
- */
+/**Login a user */
 app.post('/api/login', async (req, res) => {
 
+    const { email, password } = req.body;
+
+    if (!email || !password ) {
+        res.status(400).send({
+            error: 'Bad request'
+        });
+        return;
+    }
+
+    const user = await mongoClient.findUser(email);
+
+    if (user && PasswordUtils.comparePassword(password ,user.password)) {
+        // Generate an access token
+        const accessToken = jwt.sign({ name: user.name,  email: user.email }, accessTokenSecret);
+
+        res.status(200).send({
+            token: accessToken
+        });
+    }else{
+        res.status(400).send({error : "User not found"});
+    }
+
 });
 
-const PORT = process.env.port || 8000;
-let mongoClient = new MongoClientConnection();
-const accessTokenSecret = 'youraccesstokensecret';
-mongoClient.connect(process.env.MONGODB_URL).then(() => {
-    app.listen(PORT, ()=>{
-        console.log("Listening on port ", PORT)
-    })
+
+app.get('/api/profile', JWTUtils.authenticateJWT, async (req, res) => {
+
+    const {email} = req.user;
+    const user = await mongoClient.findEmail(email);
+    if(user) res.status(200).send({email : email, name : user.name});
+
+    else res.status(400).send({error : "User not found"});
 });
 
+return app
+}
 
-module.exports = app;
+
