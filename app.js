@@ -110,7 +110,7 @@ module.exports =  function (mongoClient) {
         else res.status(400).send({error : "User not found or logged in"});
     });
 
-    /**Get user profile */
+    /**Log a user out */
     app.get('/api/logout', JWTUtils.authenticateJWT, async (req, res) => {
         
         const {email,token} = req.user;
