@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const PasswordUtils  = require('./src/utils/password.js');
 const JWTUtils  = require('./src/utils/jwt.js');
+var Validator = require("email-validator");
+
 require("dotenv").config();
 
 
@@ -29,8 +31,15 @@ module.exports =  function (mongoClient) {
             return;
         }
 
+        if (!Validator.validate(email)) {
+            res.status(400).send({
+                error: 'Invalid email'
+            });
+            return;
+        }
+
         //verify if user already exists
-        const user = await mongoClient.findEmail(email);
+        const user = await mongoClient.findUser(email);
 
 
         // User created successfully, generate token

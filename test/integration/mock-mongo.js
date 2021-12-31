@@ -20,10 +20,6 @@ module.exports =  class MockMongoClientConnection{
         return this.users.find((user) => user.email === email);
     }
 
-    async findEmail(email) {
-        return this.users.find((user) => user.email === email);
-    }
-
     async addSession(email, token) {
         const data = {
             email: email,

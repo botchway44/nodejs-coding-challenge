@@ -28,7 +28,7 @@ module.exports =  class MongoClientConnection{
                 this.sessions_collection = await client.db(this.db_name).collection(this.sessions_db_name);
                 console.log('connected to database');
 
-                resolve(true)
+                resolve(true);
             });
         });
      }
@@ -43,9 +43,6 @@ module.exports =  class MongoClientConnection{
         return await this.users_collection?.insertOne(user);
     }
 
-    async findEmail(email) {
-        return await this.users_collection?.findOne({email : email});
-    }
 
     async findUser(email) {
         return await this.users_collection?.findOne({email : email}) ;
