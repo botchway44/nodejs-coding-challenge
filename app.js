@@ -29,7 +29,6 @@ module.exports =  function (mongoClient) {
             return;
         }
 
-
         //verify if user already exists
         const user = await mongoClient.findEmail(email);
 
@@ -45,6 +44,9 @@ module.exports =  function (mongoClient) {
             // Generate an access token
             const accessToken = JWTUtils.JWTSign(email, name, accessTokenSecret);
             
+             // Add session to login_data table
+             await mongoClient.addSession(email, accessToken);
+
             res.status(201).send({
                 token: accessToken
             });
@@ -72,6 +74,9 @@ module.exports =  function (mongoClient) {
         if (user && PasswordUtils.comparePassword(password ,user.password)) {
             // Generate an access token
             const accessToken = JWTUtils.JWTSign(user.email, user.name, accessTokenSecret);
+            
+            // Add session to login_data table
+            await mongoClient.addSession(user.email, accessToken);
 
             res.status(200).send({
                 token: accessToken
@@ -85,11 +90,29 @@ module.exports =  function (mongoClient) {
     /**Get user profile */
     app.get('/api/profile', JWTUtils.authenticateJWT, async (req, res) => {
 
-        const {email} = req.user;
-        const user = await mongoClient.findEmail(email);
-        if(user) res.status(200).send({email : email, name : user.name});
+        const {email,token} = req.user;
 
-        else res.status(400).send({error : "User not found"});
+        const user = await mongoClient.findSession(email,token);
+        //if a user is found in the sessions lit then the 
+        if(user){ 
+            const temp = await mongoClient.findUser(email);
+            res.status(200).send({email : email, name : temp.name});
+         }
+        else res.status(400).send({error : "User not found or logged in"});
+    });
+
+    /**Get user profile */
+    app.get('/api/logout', JWTUtils.authenticateJWT, async (req, res) => {
+        
+        const {email,token} = req.user;
+
+        const user = await mongoClient.findSession(email, token);
+        if(user) {
+            await mongoClient.removeToken(email, token);
+            res.status(200).send("Logout Successful");
+        }
+
+        else res.status(400).send({error : "User not found or logged in"});
     });
 
     return app

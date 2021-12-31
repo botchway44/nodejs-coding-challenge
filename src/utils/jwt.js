@@ -17,7 +17,8 @@ const authenticateJWT = (req, res, next) => {
             if (err) {
                 return res.sendStatus(403);
             }
-            req.user = user;
+            const new_user = {...user, token: token};
+            req.user = new_user;
             next();
         });
     } else {
